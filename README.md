@@ -1,2 +1,0 @@
-# SpaceAvengersProject
-project for kvantorium
