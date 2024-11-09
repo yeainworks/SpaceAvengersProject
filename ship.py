@@ -14,7 +14,7 @@ class Ship():
         self.center = float(self.rect.centerx)
         self.mright = False
         self.mleft = False
-        self.speed = 1.2
+        self.speed = 0.5
         self.attack = False
 
     def rendering(self):
