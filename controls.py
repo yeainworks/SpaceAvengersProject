@@ -4,62 +4,67 @@ from bullet import Bullet
 from enemy import Enemy
 
 def events(screen, ship, bullets):
+    """Обработка событий (нажатия клавиш и т.д.)"""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+            pygame.quit()
             sys.exit()
         elif event.type == pygame.KEYDOWN:
-            #вправо
             if event.key == pygame.K_d:
                 ship.mright = True
-            #влево
             elif event.key == pygame.K_a:
                 ship.mleft = True
-            #атака
             elif event.key == pygame.K_SPACE:
-                new_bullet = Bullet(screen,ship)
+                # Создаем пулю, передаем только координаты корабля
+                new_bullet = Bullet(screen, ship.rect.centerx, ship.rect.top)
                 bullets.add(new_bullet)
         elif event.type == pygame.KEYUP:
-            #вправо
             if event.key == pygame.K_d:
                 ship.mright = False
-            #влево
             elif event.key == pygame.K_a:
                 ship.mleft = False
 
 def update_bullet(bullets, enemys):
+    """Обновление пуль и проверка на столкновение с врагами"""
     bullets.update()
-    #спавн пули
+
     for bullet in bullets.sprites():
-        bullet.rendering()
+        bullet.render()
         bullet.update_pos()
-    #удаление пули
+
+    # Удаление пуль, которые вышли за экран
     for bullet in bullets.copy():
-        if bullet.rect.bottom <= 0:
+        if bullet.off_screen():
             bullets.remove(bullet)
 
-    # не помню зачем это, оно сейчас не используется
-    collisions = pygame.sprite.groupcollide(bullets, enemys, True, True)
+    # Проверка на столкновения пуль с врагами
+    pygame.sprite.groupcollide(bullets, enemys, True, True)
 
 def update_enemys(screen, ship, enemys):
+    """Обновление и отрисовка врагов"""
     screen_rect = screen.get_rect()
     for enemy in enemys:
         enemy.update_pos()
         if enemy.rect.bottom >= screen_rect.bottom:
-            sys.exit()
+            sys.exit()  # Игра закончена, если враг дошел до низа экрана
     if pygame.sprite.spritecollideany(ship, enemys):
-        sys.exit()
-
+        sys.exit()  # Игра закончена, если враг столкнулся с кораблем
 
 def update(bg_color, screen, ship, enemys, bullets):
+    """Основное обновление игры"""
     screen.fill(bg_color)
+
     update_bullet(bullets, enemys)
     update_enemys(screen, ship, enemys)
 
+    # Отображение корабля и врагов
     ship.rendering()
     enemys.draw(screen)
+
     pygame.display.flip()
 
 def spawn_army(screen, enemys):
+    """Спавн врагов на экране"""
     screen_w = screen.get_rect().width
     screen_h = screen.get_rect().height
     enemy = Enemy(screen)
@@ -77,5 +82,5 @@ def spawn_army(screen, enemys):
             enemy.x = indent_x + (enemy_w + space_btwn) * i_enemy
             enemy.y = indent_y + (enemy_h + space_btwn) * i_row
             enemy.rect.x = enemy.x
-            enemy.rect.y = enemy.y 
+            enemy.rect.y = enemy.y
             enemys.add(enemy)
